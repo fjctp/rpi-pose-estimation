@@ -52,7 +52,7 @@ Eigen::MatrixXd EKF::Cj(void) {
 }
 
 void EKF::predict(Eigen::VectorXd u) {
-    _x = Bj()*_x + body2euler(_x)*_dt*u;
+    _x = _A*_x + body2euler(_x)*_dt*u;
 
     _P = _A*_P*_A.transpose() + _Q;
 }
@@ -65,13 +65,13 @@ void EKF::correct(Eigen::VectorXd z) {
     double g = 9.81;
     Eigen::Vector3d z_est;
     z_est << -sin(theta), sin(phi)*cos(theta), cos(phi)*cos(theta);
-    z_est = g * z_est;
+    z_est *= g;
     Eigen::VectorXd y = z - z_est;
 
     Eigen::MatrixXd H = Cj();
     Eigen::MatrixXd S = H*_P*H.transpose() + _R;
     Eigen::MatrixXd K = _P*H.transpose()*S.inverse();
 
-    _x = _x + K*y;
-    _P = (Eigen::MatrixXd::Identity(K.rows(),H.cols())-K*H) * _P;
+    _x += K*y;
+    _P *= Eigen::MatrixXd::Identity(K.rows(),H.cols())-K*H;
 }
