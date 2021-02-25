@@ -1,17 +1,19 @@
 #include "EKF.hpp"
 #include "Eigen/Dense"
 
+#include <cmath>
+
 EKF::EKF() {
     _A = Eigen::MatrixXd::Identity(3, 3);
     _Q = 0.218166156499291e-9 * Eigen::MatrixXd::Identity(3, 3);
     _R = 0.981 * Eigen::MatrixXd::Identity(3, 3);
 
-    _x << 0.0, 0.0, 0.0;
+    _x = Eigen::Vector3d(0.0, 0.0, 0.0);
     _P = 1e-6 * Eigen::MatrixXd::Identity(3, 3);
 }
 
 EKF::~EKF() {
-
+    
 }
 
 void EKF::init(const double dt = 0.02) {
@@ -19,9 +21,9 @@ void EKF::init(const double dt = 0.02) {
 }
 
 Eigen::Matrix3d EKF::body2euler(const Eigen::Vector3d euler) {
-    double phi = euler(1);
-    double theta = euler(2);
-    double psi = euler(3);
+    double phi = euler[0];
+    double theta = euler[1];
+    double psi = euler[2];
 
     Eigen::Matrix3d dcm;
     dcm <<  1, sin(phi)*tan(theta), cos(phi)*tan(theta),
@@ -41,15 +43,15 @@ Eigen::MatrixXd EKF::Cj(void) {
 
     float g = 9.81;
     Eigen::MatrixXd mat = Eigen::MatrixXd::Zero(3, 3);
-    mat(1,2) = -cos(theta);
-    mat(2,1) = cos(phi)*cos(theta);
-    mat(2,2) = -sin(phi)*sin(theta);
-    mat(3,1) = -sin(phi)*cos(theta);
-    mat(3,2) = -cos(phi)*sin(theta);
+    mat(0,1) = -cos(theta);
+    mat(1,0) = cos(phi)*cos(theta);
+    mat(1,1) = -sin(phi)*sin(theta);
+    mat(2,0) = -sin(phi)*cos(theta);
+    mat(2,1) = -cos(phi)*sin(theta);
     return g*mat;
 }
 
-void EKF::perdict(Eigen::VectorXd u) {
+void EKF::predict(Eigen::VectorXd u) {
     _x = Bj()*_x + body2euler(_x)*_dt*u;
 
     _P = _A*_P*_A.transpose() + _Q;
