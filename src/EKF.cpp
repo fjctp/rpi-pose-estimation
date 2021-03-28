@@ -3,21 +3,25 @@
 
 #include <cmath>
 
-EKF::EKF() {
-    _A = Eigen::MatrixXd::Identity(3, 3);
-    _Q = 0.218166156499291e-9 * Eigen::MatrixXd::Identity(3, 3);
-    _R = 0.981 * Eigen::MatrixXd::Identity(3, 3);
+EKF::EKF() {}
 
-    _x = Eigen::Vector3d(0.0, 0.0, 0.0);
-    _P = 1e-6 * Eigen::MatrixXd::Identity(3, 3);
-}
-
-EKF::~EKF() {
-    
-}
+EKF::~EKF() {}
 
 void EKF::init(const double dt = 0.02) {
     _dt = dt;
+
+    _A = Eigen::MatrixXd::Identity(3, 3);
+    double q1 = _dt*_dt*_dt*_dt * 10.0/180.0*M_PI;
+    double q2 = _dt*_dt*_dt*_dt * 10.0/180.0*M_PI;
+    double q3 = _dt*_dt*_dt*_dt * 10.0/180.0*M_PI;
+    _Q = Eigen::DiagonalMatrix<double, 3> (q1, q2, q3);
+    double r1 = 0.981;
+    double r2 = 0.981;
+    double r3 = 0.981;
+    _R = Eigen::DiagonalMatrix<double, 3> (r1, r2, r3);
+
+    _x = Eigen::Vector3d(0.0, 0.0, 0.0);
+    _P = 1e-6 * Eigen::MatrixXd::Identity(3, 3);
 }
 
 Eigen::Matrix3d EKF::body2euler(const Eigen::Vector3d euler) {
