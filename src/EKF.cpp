@@ -11,17 +11,20 @@ void EKF::init(const double dt = 0.02) {
     _dt = dt;
 
     _A = Eigen::MatrixXd::Identity(3, 3);
-    double q1 = _dt*_dt*_dt*_dt * 10.0/180.0*M_PI;
-    double q2 = _dt*_dt*_dt*_dt * 10.0/180.0*M_PI;
-    double q3 = _dt*_dt*_dt*_dt * 10.0/180.0*M_PI;
-    _Q = Eigen::DiagonalMatrix<double, 3> (q1, q2, q3);
-    double r1 = 0.981;
-    double r2 = 0.981;
-    double r3 = 0.981;
-    _R = Eigen::DiagonalMatrix<double, 3> (r1, r2, r3);
 
     _x = Eigen::Vector3d(0.0, 0.0, 0.0);
     _P = 1e-6 * Eigen::MatrixXd::Identity(3, 3);
+
+    
+    double q1 = pow(0.002164253, 2.0);
+    double q2 = pow(0.001151233, 2.0);
+    double q3 = pow(0.001192117, 2.0);
+    _Q = Eigen::DiagonalMatrix<double, 3> (q1, q2, q3);
+
+    double r1 = pow(0.015071111, 2.0);
+    double r2 = pow(0.014420412, 2.0);
+    double r3 = pow(0.015951925, 2.0);
+    _R = Eigen::DiagonalMatrix<double, 3> (r1, r2, r3);
 }
 
 Eigen::Matrix3d EKF::body2euler(const Eigen::Vector3d euler) {
